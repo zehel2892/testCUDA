@@ -103,6 +103,8 @@ int main( int argc , char ** argv)
 	Point * p_upper[CalculateUpperPart(*p,num_of_lines)];
 	Point * p_lower[CalculateLowerPart(*p,num_of_lines)];
 	//SplitAerofoil(*p,*p_upper,*p_lower);
+	//
+	
 
 return 0;
 
