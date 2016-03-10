@@ -3,6 +3,7 @@
 #include<stdio.h>
 #include<fstream>
 #include<cstdlib> // for exit(EXIT_FAILURE)
+#include<vector>
 #include"mesh.h"
 
 #define BUFFER_SIZE 512
@@ -10,9 +11,9 @@
 // Forward declarations
 extern "C" void RunTest();// interface for cuda.cu
 // Will return an array full of c++ objects
-void SplitAerofoil(Point _p[],Point _p_upper[],Point _p_lower[], int _num_of_lines);
-int CalculateUpperPart(Point _p[], int _num_of_lines);
-int CalculateLowerPart(Point _p[], int _num_of_lines);
+void SplitAerofoil(const std::vector<Point *>  & _p,std::vector<Point *>  &_p_upper,std::vector<Point *> & _p_lower, int _num_of_lines);
+int CalculateUpperPart(const std::vector<Point *> & _p, int _num_of_lines);
+int CalculateLowerPart(const std::vector<Point *> & _p, int _num_of_lines);
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc , char ** argv)
 {
@@ -52,9 +53,9 @@ int main( int argc , char ** argv)
 	}
 
 	// Create space for objects of class Point
-	
-	Point * p[num_of_lines];
-	std::cout<<"XXXXXXXXX  "<<sizeof(p)/sizeof(p[0])<<std::endl;
+	std::vector<Point *> p;	
+	//Point * p[num_of_lines];
+	//std::cout<<"XXXXXXXXX  "<<sizeof(p)/sizeof(p[0])<<std::endl;
 	
 
 	// Create space for the co-ordinates
@@ -74,8 +75,8 @@ int main( int argc , char ** argv)
 	
 	std::cout<<l_x<<"    |    "<<l_y<<std::endl;
 
-	
-	p[counter] = new Point(l_x,l_y);
+	p.push_back(new Point(l_x,l_y));
+	//p[counter] = new Point(l_x,l_y);
 //	p[counter]->GetValues();
 
 //	std::cout<<"------"<<counter<<std::endl;
@@ -89,8 +90,9 @@ int main( int argc , char ** argv)
 	}
 	
 	std::cout<<"Total Count = "<<counter<<std::endl;
-	
-	for(unsigned  i = 0; i<=sizeof(p)/sizeof(p[0]) ;i++)
+	// make sure to check upto p.size()-1 not p.size() as it will cause segmentation fault
+	for(unsigned  i = 0; i<=p.size()-1 ;i++)
+
 	{
 		p[i]->GetValues();
 	}
@@ -100,35 +102,51 @@ int main( int argc , char ** argv)
 
 	file.close();
 //	RunTest(); // CUDA interface
-	Point * p_upper[CalculateUpperPart(*p,num_of_lines)];
-	Point * p_lower[CalculateLowerPart(*p,num_of_lines)];
-	//SplitAerofoil(*p,*p_upper,*p_lower);
-	//
+	//Point * p_upper[CalculateUpperPart(p,num_of_lines)];
+	//Point * p_lower[CalculateLowerPart(p,num_of_lines)];
+	std::vector<Point *> p_upper;
+	std::vector<Point *> p_lower;
+
+
 	
+	//SplitAerofoil(*p,*p_upper,*p_lower);
+	SplitAerofoil(p,p_upper,p_lower,num_of_lines);
 
 return 0;
 
 
 }
 
-void  SplitAerofoil(Point _p[],Point _p_upper[],Point _p_lower[],int _num_of_lines)
+void  SplitAerofoil(const std::vector<Point *> &  _p,std::vector<Point *> & _p_upper,std::vector<Point *> & _p_lower,int _num_of_lines)
 {
-	unsigned int originXPos =(unsigned int) CalculateUpperPart(_p, _num_of_lines);
-	
+	unsigned int originXPos =(unsigned int) CalculateUpperPart(_p, _num_of_lines);	
 	// Copy all the data upto originXPos into _p_upper[] array
 	for(unsigned int i=0; i<=originXPos; i++)
 	{
-		_p_upper[i] = _p[i];
+	//	_p_upper[i] = _p[i];
+		_p_upper.push_back(_p[i]);	
 	}
 	
 
-	for(unsigned int i=originXPos; i<=sizeof(_p)/sizeof(_p[0]);i++)
+	for(unsigned int i=originXPos-1; i<=_p.size();i++)
 	{
-		_p_lower[i] = _p[i];
+	//	_p_lower[i] = _p[i];
+		_p_lower.push_back(_p[i]);	
+	}
+
+	std::cout<<"Printing Upperpart "<<std::endl;
+	for(unsigned int i=0; i<=_p_upper.size()-2;i++)
+	{
+		_p_upper[i]->GetValues();
+	}
+	std::cout<<"Printing Lower Part"<<std::endl;
+	for(unsigned int i=0; i<=_p_lower.size()-2;i++)
+	{
+		_p_lower[i]->GetValues();
 	}	
 }
 
-int CalculateUpperPart(Point _p[],int _num_of_lines)
+int CalculateUpperPart(const std::vector<Point *> & _p,int _num_of_lines)
 {
 	// Number of 0.00 x co-ordinates are found
 	int originXPos;
@@ -142,7 +160,7 @@ int CalculateUpperPart(Point _p[],int _num_of_lines)
 return numUpperPart;
 
 }
-int CalculateLowerPart(Point _p[],int _num_of_lines)
+int CalculateLowerPart(const std::vector<Point *> & _p,int _num_of_lines)
 {
 	// Number of 0.00 x co-ordinates are found
 	int originXCount=0;
