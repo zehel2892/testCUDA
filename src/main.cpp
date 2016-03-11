@@ -10,7 +10,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Forward declarations
 extern "C" void RunTest();// interface for cuda.cu
-// Will return an array full of c++ objects
+
+extern void FindQuadraticInterpolationUnknowns(const std::vector<Point *>& _p_upper,
+						const std::vector<Point *>& _p_lower,
+						std::vector<Point *> & _unknown,
+						int _num_of_lines);
+// Split the aerofoil into two parts
 void SplitAerofoil(const std::vector<Point *>  & _p,std::vector<Point *>  &_p_upper,std::vector<Point *> & _p_lower, int _num_of_lines);
 int CalculateUpperPart(const std::vector<Point *> & _p, int _num_of_lines);
 int CalculateLowerPart(const std::vector<Point *> & _p, int _num_of_lines);
@@ -54,6 +59,7 @@ int main( int argc , char ** argv)
 
 	// Create space for objects of class Point
 	std::vector<Point *> p;	
+	std::vector<Point *> unknown; // store the unknown coefficients a,b,c of Quadratic interpolation
 	//Point * p[num_of_lines];
 	//std::cout<<"XXXXXXXXX  "<<sizeof(p)/sizeof(p[0])<<std::endl;
 	
@@ -111,6 +117,7 @@ int main( int argc , char ** argv)
 	
 	//SplitAerofoil(*p,*p_upper,*p_lower);
 	SplitAerofoil(p,p_upper,p_lower,num_of_lines);
+	FindQuadraticInterpolationUnknowns(p_upper,p_lower,unknown,num_of_lines);
 
 return 0;
 

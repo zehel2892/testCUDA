@@ -7,10 +7,12 @@ GLFW_FLAGS =  -lGLU -lGL -L/usr/local/lib  -lglfw3 -lrt -lXrandr -lXinerama -lXi
 
 all: main
 
-main: main.o cuda.cu
-	$(NVCC) main.o cuda.cu  -o a
+main: main.o quadraticInterpolation.o cuda.cu
+	$(NVCC) quadraticInterpolation.o main.o  cuda.cu  -o a
 main.o: main.cpp
 	$(CC) $(CCFLAGS) main.cpp 
+quadraticInterpolation.o: quadraticInterpolation.cpp
+	$(CC) $(CCFLAGS) quadraticInterpolation.cpp
 gl: glfw.cpp
 	$(CC) $(CCFLAGS) glfw.cpp
 	$(CC) -o gl  glfw.o $(GLFW_FLAGS)
