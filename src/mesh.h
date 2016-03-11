@@ -9,7 +9,7 @@
 
 class Point
 {
-private:
+public:
 	float m_x;
 	float m_y;
 public:
@@ -36,7 +36,8 @@ public:
 
 	float GetY(void)
 	{
-		return this->m_y;
+		
+		return  this->m_y;
 	}
 
 }; // end class Point

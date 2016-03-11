@@ -11,9 +11,9 @@
 // Forward declarations
 extern "C" void RunTest();// interface for cuda.cu
 
-extern void FindQuadraticInterpolationUnknowns(const std::vector<Point *>& _p_upper,
-						const std::vector<Point *>& _p_lower,
-						std::vector<Point *> & _unknown,
+extern void FindQuadraticInterpolationUnknowns(const std::vector<Point *>& p_upper,
+						const std::vector<Point *>& p_lower,
+						std::vector<Point *> & unknown,
 						int _num_of_lines);
 // Split the aerofoil into two parts
 void SplitAerofoil(const std::vector<Point *>  & _p,std::vector<Point *>  &_p_upper,std::vector<Point *> & _p_lower, int _num_of_lines);
@@ -31,7 +31,7 @@ int main( int argc , char ** argv)
 	std::ifstream file;
 
 	// Open a text file for reading
-	file.open("../res/NACA2412.dat");
+	file.open("../res/naca2412.dat");
 	
 	// Check for Open failure
 	if(!file.is_open())
@@ -50,7 +50,7 @@ int main( int argc , char ** argv)
 
 	file.close();
 	file.clear();
-	file.open("../res/NACA2412.dat");
+	file.open("../res/naca2412.dat");
 
 	if(!file.is_open())
 	{
@@ -59,7 +59,6 @@ int main( int argc , char ** argv)
 
 	// Create space for objects of class Point
 	std::vector<Point *> p;	
-	std::vector<Point *> unknown; // store the unknown coefficients a,b,c of Quadratic interpolation
 	//Point * p[num_of_lines];
 	//std::cout<<"XXXXXXXXX  "<<sizeof(p)/sizeof(p[0])<<std::endl;
 	
@@ -110,13 +109,15 @@ int main( int argc , char ** argv)
 //	RunTest(); // CUDA interface
 	//Point * p_upper[CalculateUpperPart(p,num_of_lines)];
 	//Point * p_lower[CalculateLowerPart(p,num_of_lines)];
-	std::vector<Point *> p_upper;
-	std::vector<Point *> p_lower;
+	static 	std::vector<Point *> p_upper;
+	static std::vector<Point *> p_lower;
 
+	std::vector<Point *> unknown; // store the unknown coefficients a,b,c of Quadratic interpolation
 
 	
 	//SplitAerofoil(*p,*p_upper,*p_lower);
 	SplitAerofoil(p,p_upper,p_lower,num_of_lines);
+	std::cout<<p_upper[10]->GetX()<<std::endl;
 	FindQuadraticInterpolationUnknowns(p_upper,p_lower,unknown,num_of_lines);
 
 return 0;
